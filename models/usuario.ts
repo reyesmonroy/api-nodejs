@@ -1,7 +1,7 @@
-import { DataType, DataTypes } from "sequelize";
+import { DataTypes } from "sequelize";
 import db from "../db/connection";
 
-const Usuario = db.define('usuario', {
+const Usuario = db.define('Usuario', {
   nombre: {
     type: DataTypes.STRING
   },
@@ -9,7 +9,7 @@ const Usuario = db.define('usuario', {
     type: DataTypes.STRING
   },
   estado: {
-    type: DataTypes.TINYINT
+    type: DataTypes.BOOLEAN
   }
 });
 

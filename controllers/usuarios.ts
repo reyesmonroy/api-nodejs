@@ -20,13 +20,11 @@ export const getUsuario = async (req: Request, res: Response) => {
   try {
     const usuario = await Usuario.findByPk(id);
     if (usuario) {
-      res.status(200).json(usuario);
-    } else {
-      res.status(404).json({
-        error: `No se contro el recurso con el id ${id}`
-      });
-    }
-    
+      return res.status(200).json(usuario);
+    } 
+    res.status(404).json({
+      error: `No se contro el recurso con el id ${id}`
+    });
   } catch (error) {
     res.status(500).json({
       error: 'No se pudo cargar los datos'
@@ -38,31 +36,67 @@ export const getUsuario = async (req: Request, res: Response) => {
 export const postUsuario = async (req: Request, res: Response) => {
   const { body } = req;
   try {
-    const usuario = new Usuario(body);
-    await usuario.save();
-    res.status(200).json(usuario);
+    const existeEmail = await Usuario.findOne({
+      where: {
+        email: body.email
+      }
+    });
+    if (existeEmail) {
+      return res.status(400).json({
+        error: 'Ya existe un usuario con el mismo email' + body.email
+      });
+    }
+
+    const usuario = await Usuario.create(body);
+    res.status(201).json(usuario);
   } catch (error) {
     res.status(500).json({
-      error: 'No se pudo cargar los datos'
+      error: 'No se pudo crear el usuario'
     });
     console.log(error);
   }
 }
 
-export const putUsuario = (req: Request, res: Response) => {
+export const putUsuario = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { body } = req;
-  res.json({
-    msg: 'putUsuario',
-    body: body,
-    id: id
-  });
+  try {
+    const usuario = await Usuario.findByPk(id);
+    if (!usuario) {
+      res.status(404).json({
+        error: `No existe un usuario con el id ${id}`
+      });
+    }
+
+    await usuario?.update(body);
+    res.status(200).json(usuario);
+  } catch (error) {
+    res.status(500).json({
+      error: 'No se actualizaron los datos'
+    });
+    console.log(error);
+  }
 }
 
-export const deleteUsuario = (req: Request, res: Response) => {
+export const deleteUsuario = async (req: Request, res: Response) => {
   const { id } = req.params;
-  res.json({
-    msg: 'deleteUsuario',
-    id: id
-  });
+  const { body } = req;
+  try {
+    const usuario = await Usuario.findByPk(id);
+    if (!usuario) {
+      res.status(404).json({
+        error: `No existe un usuario con el id ${id}`
+      });
+    }
+
+    await usuario?.update({
+      estado: false
+    });
+    res.status(200).json(usuario);
+  } catch (error) {
+    res.status(500).json({
+      error: 'No se eliminarion los datos'
+    });
+    console.log(error);
+  }
 }
